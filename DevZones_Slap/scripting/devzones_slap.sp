@@ -3,12 +3,11 @@
 #include <sdktools>
 #include <devzones>
 
-//Configure this
-#define CHECKER_VALUE 0.1 // checks per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume
+#define ZONE_PREFIX_CT "SlapCT"
+#define ZONE_PREFIX_TT "SlapTT"
+#define ZONE_PREFIX_ANY "SlapANY"
+#define REPEAT_VALUE 0.1
 
-#define TEAM 0 // Apply to what team? - 0 = any, 2 = T , 3 = CT
-
-// end
 
 
 public Plugin:myinfo =
@@ -16,19 +15,46 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - Slap",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.1",
+	version = "2.0",
 	url = "http://www.clanuea.com/"
 };
 
-public OnMapStart()
+new Handle:g_hClientTimers[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
+
+public OnClientDisconnect(client)
 {
-	CreateTimer(CHECKER_VALUE, Comprobador, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	if (g_hClientTimers[client] != INVALID_HANDLE)
+		KillTimer(g_hClientTimers[client]);
+	g_hClientTimers[client] = INVALID_HANDLE;
 }
 
-public Action:Comprobador(Handle:timer)
+public Zone_OnClientEntry(client, String:zone[])
 {
-	for (new p = 1; p <= MaxClients; p++)
-		if(IsClientInGame(p) && IsPlayerAlive(p) && (!TEAM || TEAM == GetClientTeam(p)))
-			if(Zone_IsClientInZone(p, "Slap", false, false))
-				SlapPlayer(p, 0, false);
+	if((StrContains(zone, ZONE_PREFIX_CT, false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, ZONE_PREFIX_TT, false) == 0 && GetClientTeam(client) == 2) || StrContains(zone, ZONE_PREFIX_ANY, false) == 0)
+	{
+		g_hClientTimers[client] = CreateTimer(REPEAT_VALUE, Timer_Repeat, client, TIMER_REPEAT);
+	}
+}
+
+public Zone_OnClientLeave(client, String:zone[])
+{
+	if((StrContains(zone, ZONE_PREFIX_CT, false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, ZONE_PREFIX_TT, false) == 0 && GetClientTeam(client) == 2) || StrContains(zone, ZONE_PREFIX_ANY, false) == 0)
+	{
+		if (g_hClientTimers[client] != INVALID_HANDLE)
+			KillTimer(g_hClientTimers[client]);
+		g_hClientTimers[client] = INVALID_HANDLE;
+	}
+}
+
+public Action:Timer_Repeat(Handle:timer, any:client)
+{
+	if(!IsPlayerAlive(client))
+	{
+		if (g_hClientTimers[client] != INVALID_HANDLE)
+			KillTimer(g_hClientTimers[client]);
+		g_hClientTimers[client] = INVALID_HANDLE;
+		return Plugin_Stop;
+	}
+	SlapPlayer(client, 0, false);
+	return Plugin_Continue;
 }

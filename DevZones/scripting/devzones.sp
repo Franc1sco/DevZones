@@ -4,14 +4,10 @@
 #include <sourcemod>
 #include <sdktools>
 
-//Configure this
-#define CHECKER_VALUE 0.1 // checks per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume
-
-// end
 
 
 
-#define VERSION "1.2"
+#define VERSION "2.0"
 
 
 
@@ -36,23 +32,34 @@ new g_HaloSprite;
 new Handle:hOnClientEntry = INVALID_HANDLE;
 new Handle:hOnClientLeave = INVALID_HANDLE;
 
+
 enum listado
 {
 	String:nombrez[64],
 	bool:esta
 }
 
-new g_zonas[MAXPLAYERS+1][192][listado];
+new g_zonas[MAXPLAYERS+1][192][listado]; // max zones = 192
 
 
+// cvars
 
+new Handle:cvar_mode;
+new Handle:cvar_checker;
+new Handle:cvar_model;
+
+new Float:checker;
+new bool:mode_plugin;
+new String:model[192];
+
+new Handle:cvar_timer = INVALID_HANDLE;
 
 // PLUGIN INFO
 public Plugin:myinfo =
 {
 	name = "SM DEV Zones",
 	author = "Franc1sco franug",
-	description = "",
+	description = "zones plugin",
 	version = VERSION,
 	url = "http://www.clanuea.com/"
 };
@@ -60,13 +67,40 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
+	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
+	cvar_model = CreateConVar("sm_devzones_model", "models/items/cs_gift.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
 	g_Zones = CreateArray(256);
 	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_ROOT);
 	RegConsoleCmd("say",fnHookSay);
+	HookEvent("round_start", Event_OnRoundStart);
 	//HookEvent("round_start", OnRoundStart);
 
-	CreateTimer(CHECKER_VALUE, BeamBoxAll, INVALID_HANDLE, TIMER_REPEAT);
 	ReadZones();
+	
+	HookConVarChange(cvar_checker, CVarChange);
+	HookConVarChange(cvar_mode, CVarChange);
+	HookConVarChange(cvar_model, CVarChange);
+}
+
+public CVarChange(Handle:convar_hndl, const String:oldValue[], const String:newValue[])
+{
+	GetCVars();
+}
+
+// Get new values of cvars if they has being changed
+public GetCVars()
+{
+	mode_plugin = GetConVarBool(cvar_mode);
+	checker = GetConVarFloat(cvar_checker);
+	GetConVarString(cvar_model, model, 192);
+	
+	if(cvar_timer != INVALID_HANDLE)
+	{
+		KillTimer(cvar_timer);
+		cvar_timer = INVALID_HANDLE;
+	}
+	cvar_timer = CreateTimer(checker, BeamBoxAll, _, TIMER_REPEAT);
 }
 
 public OnClientPostAdminCheck(client)
@@ -74,6 +108,106 @@ public OnClientPostAdminCheck(client)
 	g_ClientSelectedZone[client]=-1;
 	g_Editing[client]=0;
 	FijarNombre[client] = false;
+}
+
+public Action:Event_OnRoundStart(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if(mode_plugin) RefreshZones();
+}
+
+CreateZoneEntity(Float:fMins[3], Float:fMaxs[3], String:sZoneName[64])
+{
+	new Float:fMiddle[3];
+	new iEnt = CreateEntityByName("trigger_multiple");
+	
+	DispatchKeyValue(iEnt, "spawnflags", "64");
+	Format(sZoneName, sizeof(sZoneName), "sm_devzone %s", sZoneName);
+	DispatchKeyValue(iEnt, "targetname", sZoneName);
+	DispatchKeyValue(iEnt, "wait", "0");
+	
+	DispatchSpawn(iEnt);
+	ActivateEntity(iEnt);
+	SetEntProp(iEnt, Prop_Data, "m_spawnflags", 64 );
+	
+	GetMiddleOfABox(fMins, fMaxs, fMiddle);
+	
+	TeleportEntity(iEnt, fMiddle, NULL_VECTOR, NULL_VECTOR);
+	SetEntityModel(iEnt, model);
+	
+	// Have the mins always be negative
+	fMins[0] = fMins[0] - fMiddle[0];
+	if(fMins[0] > 0.0)
+		fMins[0] *= -1.0;
+	fMins[1] = fMins[1] - fMiddle[1];
+	if(fMins[1] > 0.0)
+		fMins[1] *= -1.0;
+	fMins[2] = fMins[2] - fMiddle[2];
+	if(fMins[2] > 0.0)
+		fMins[2] *= -1.0;
+	
+	// And the maxs always be positive
+	fMaxs[0] = fMaxs[0] - fMiddle[0];
+	if(fMaxs[0] < 0.0)
+		fMaxs[0] *= -1.0;
+	fMaxs[1] = fMaxs[1] - fMiddle[1];
+	if(fMaxs[1] < 0.0)
+		fMaxs[1] *= -1.0;
+	fMaxs[2] = fMaxs[2] - fMiddle[2];
+	if(fMaxs[2] < 0.0)
+		fMaxs[2] *= -1.0;
+	
+	SetEntPropVector(iEnt, Prop_Send, "m_vecMins", fMins);
+	SetEntPropVector(iEnt, Prop_Send, "m_vecMaxs", fMaxs);
+	SetEntProp(iEnt, Prop_Send, "m_nSolidType", 2);
+	
+	new iEffects = GetEntProp(iEnt, Prop_Send, "m_fEffects");
+	iEffects |= 32;
+	SetEntProp(iEnt, Prop_Send, "m_fEffects", iEffects);
+	
+	HookSingleEntityOutput(iEnt, "OnStartTouch", EntOut_OnStartTouch);
+	HookSingleEntityOutput(iEnt, "OnEndTouch", EntOut_OnEndTouch);
+}
+
+public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay)
+{	
+	// Ignore dead players
+	if(activator < 1 || activator > MaxClients || !IsPlayerAlive(activator))
+		return;
+		
+	decl String:sTargetName[256];
+	GetEntPropString(caller, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
+	ReplaceString(sTargetName, sizeof(sTargetName), "sm_devzone ", "");
+	
+	
+	// entra
+	//g_zonas[activator][caller][esta] = true;
+	//Format(g_zonas[activator][caller][nombrez], 64, sTargetName);
+	Call_StartForward(hOnClientEntry);
+	Call_PushCell(activator);
+	Call_PushString(sTargetName);
+	Call_Finish();
+		
+}
+
+public EntOut_OnEndTouch(const String:output[], caller, activator, Float:delay)
+{	
+	// Ignore dead players
+	if(activator < 1 || activator > MaxClients || !IsPlayerAlive(activator))
+		return;
+		
+	decl String:sTargetName[256];
+	GetEntPropString(caller, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
+	ReplaceString(sTargetName, sizeof(sTargetName), "sm_devzone ", "");
+	
+	
+	// sale
+	//g_zonas[activator][caller][esta] = false;
+	//Format(g_zonas[activator][caller][nombrez], 64, sTargetName);
+	Call_StartForward(hOnClientLeave);
+	Call_PushCell(activator);
+	Call_PushString(sTargetName);
+	Call_Finish();
+		
 }
 
 /*
@@ -93,9 +227,10 @@ public Action:OnRoundStart(Handle:event, const String:name[], bool:dontBroadcast
 
 public OnMapStart()
 {
-
+	GetCVars();
 	g_BeamSprite = PrecacheModel("materials/sprites/laser.vmt");
 	g_HaloSprite = PrecacheModel("materials/sprites/halo01.vmt");
+	PrecacheModel(model);
 	ReadZones();
 }
 
@@ -240,7 +375,7 @@ public Action:fnHookSay(client,args)
 	ReplaceString(sArgs, 192, "'", ".");
 	ReplaceString(sArgs, 192, "<", ".");
 	//ReplaceString(sArgs, 192, "\"", ".");
-	if(strlen(sArgs) > 63)
+	if(strlen(sArgs) > 45)
 	{
 		PrintToChat(client, "the name is too long, try other name");
 		return;
@@ -274,12 +409,12 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	hOnClientEntry = CreateGlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
 	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
-	CreateNative("Zone_IsClientInZone", Native_InZone);
+	//CreateNative("Zone_IsClientInZone", Native_InZone);
 	CreateNative("Zone_GetZonePosition", Native_Teleport);
     
 	return APLRes_Success;
 }
-
+/*
 public Native_InZone(Handle:plugin, argc)
 {  
 	
@@ -306,7 +441,7 @@ public Native_InZone(Handle:plugin, argc)
 				
 	}
 	return false;
-}
+}*/
 
 public Native_Teleport(Handle:plugin, argc)
 {  
@@ -384,8 +519,11 @@ public Action:BeamBoxAll(Handle:timer, any:data)
 				if(g_ClientSelectedZone[p]!=i && (Vis==1 || GetClientTeam(p)==Vis))
 				{
 					getZoneTeamColor(Team, zColor);
-					TE_SendBeamBoxToClient(p, posA, posB, g_BeamSprite, g_HaloSprite,  0, 30, CHECKER_VALUE, 5.0, 5.0, 2, 1.0, zColor, 0);
+					TE_SendBeamBoxToClient(p, posA, posB, g_BeamSprite, g_HaloSprite,  0, 30, checker, 5.0, 5.0, 2, 1.0, zColor, 0);
 				}
+				
+				if(mode_plugin) continue;
+				
 				if(IsPlayerAlive(p))
 				{
 					if(IsbetweenRect(NULL_VECTOR, posA, posB, p))
@@ -761,6 +899,7 @@ public MenuHandler_Editor(Handle:tMenu, MenuAction:action, client, item)
 					g_Editing[client]=0;
 					g_ClientSelectedZone[client]=-1;
 					ZoneMenu(client);
+					if(mode_plugin) RefreshZones();
 				}
 				case 4:
 				{
@@ -793,6 +932,7 @@ public MenuHandler_Editor(Handle:tMenu, MenuAction:action, client, item)
 					g_CurrentZoneVis[client]=0;
 					g_Editing[client]=0;
 					ZoneMenu(client);
+					if(mode_plugin) RefreshZones();
 					// Save zone
 				}
 				case 5:
@@ -1023,6 +1163,7 @@ public MenuHandler_ClearZones(Handle:tMenu, MenuAction:action, client, item)
 			{
 				ClearArray(g_Zones);
 				PrintToChat(client, "Zones cleared");
+				RemoveZones();
 			}
 			ZoneMenu(client);
 
@@ -1030,6 +1171,53 @@ public MenuHandler_ClearZones(Handle:tMenu, MenuAction:action, client, item)
 		case MenuAction_End:
 		{
 			CloseHandle(tMenu);
+		}
+	}
+}
+
+
+stock GetMiddleOfABox(const Float:vec1[3], const Float:vec2[3], Float:buffer[3])
+{
+	new Float:mid[3];
+	MakeVectorFromPoints(vec1, vec2, mid);
+	mid[0] = mid[0] / 2.0;
+	mid[1] = mid[1] / 2.0;
+	mid[2] = mid[2] / 2.0;
+	AddVectors(vec1, mid, buffer);
+}
+
+stock RefreshZones()
+{
+	RemoveZones();
+	new size = GetArraySize(g_Zones);
+	new Float:posA[3], Float:posB[3],String:nombre[64];
+	for(new i=0;i<size;++i)
+	{
+		new Handle:trie = GetArrayCell(g_Zones, i);
+		GetTrieArray(trie, "corda", posA, sizeof(posA));
+		GetTrieArray(trie, "cordb", posB, sizeof(posB));
+		GetTrieString(trie, "name", nombre, 64);
+		CreateZoneEntity(posA, posB, nombre);
+	}
+}
+
+stock RemoveZones()
+{
+	// First remove any old zone triggers
+	new iEnts = GetMaxEntities();
+	decl String:sClassName[64];
+	for(new i=MaxClients;i<iEnts;i++)
+	{
+		if(IsValidEntity(i)
+		&& IsValidEdict(i)
+		&& GetEdictClassname(i, sClassName, sizeof(sClassName))
+		&& StrContains(sClassName, "trigger_multiple") != -1
+		&& GetEntPropString(i, Prop_Data, "m_iName", sClassName, sizeof(sClassName))
+		&& StrContains(sClassName, "sm_devzone") != -1)
+		{
+			UnhookSingleEntityOutput(i, "OnStartTouch", EntOut_OnStartTouch);
+			UnhookSingleEntityOutput(i, "OnEndTouch", EntOut_OnEndTouch);
+			AcceptEntityInput(i, "Kill");
 		}
 	}
 }
