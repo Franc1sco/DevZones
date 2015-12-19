@@ -7,7 +7,7 @@
 
 
 
-#define VERSION "2.1.1"
+#define VERSION "2.2"
 
 
 
@@ -58,7 +58,7 @@ new Handle:cvar_timer = INVALID_HANDLE;
 public Plugin:myinfo =
 {
 	name = "SM DEV Zones",
-	author = "Franc1sco franug",
+	author = "Franc1sco franug & Root",
 	description = "zones plugin",
 	version = VERSION,
 	url = "http://steamcommunity.com/id/franug"
@@ -69,7 +69,7 @@ public OnPluginStart()
 	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
-	cvar_model = CreateConVar("sm_devzones_model", "models/props/de_train/barrel.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
+	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
 	g_Zones = CreateArray(256);
 	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_ROOT);
 	RegConsoleCmd("say",fnHookSay);
@@ -714,15 +714,15 @@ public ZoneMenu(client)
 {
 	g_ClientSelectedZone[client]=-1;
 	g_Editing[client]=0;
-	new Handle:Menu = CreateMenu(Handle_ZoneMenu);
-	SetMenuTitle(Menu, "Zones");
-	AddMenuItem(Menu, "", "Create Zone");
-	AddMenuItem(Menu, "", "Edit Zones");
-	AddMenuItem(Menu, "", "Save Zones");
-	AddMenuItem(Menu, "", "Reload Zones");
-	AddMenuItem(Menu, "", "Clear Zones");
-	SetMenuExitBackButton(Menu, true);
-	DisplayMenu(Menu, client, MENU_TIME_FOREVER);
+	new Handle:Menu2 = CreateMenu(Handle_ZoneMenu);
+	SetMenuTitle(Menu2, "Zones");
+	AddMenuItem(Menu2, "", "Create Zone");
+	AddMenuItem(Menu2, "", "Edit Zones");
+	AddMenuItem(Menu2, "", "Save Zones");
+	AddMenuItem(Menu2, "", "Reload Zones");
+	AddMenuItem(Menu2, "", "Clear Zones");
+	SetMenuExitBackButton(Menu2, true);
+	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
 public Handle_ZoneMenu(Handle:tMenu, MenuAction:action, client, item)
@@ -767,8 +767,8 @@ public Handle_ZoneMenu(Handle:tMenu, MenuAction:action, client, item)
 
 public ListZones(client, MenuHandler:handler)
 {
-	new Handle:Menu = CreateMenu(handler);
-	SetMenuTitle(Menu, "Avaliable Zones");
+	new Handle:Menu2 = CreateMenu(handler);
+	SetMenuTitle(Menu2, "Avaliable Zones");
 	
 	decl String:ZoneName[256], String:ZoneId[64], String:Id[64],TeamId;
 	new size = GetArraySize(g_Zones);
@@ -780,13 +780,13 @@ public ListZones(client, MenuHandler:handler)
 			GetTrieString(GetArrayCell(g_Zones, i), "name", ZoneId, 64);
 			IntToString(i, Id, sizeof(Id));
 			Format(ZoneName, sizeof(ZoneName), ZoneId);
-			AddMenuItem(Menu, Id, ZoneId);
+			AddMenuItem(Menu2, Id, ZoneId);
 		}
 	}else{
-		AddMenuItem(Menu, "", "No zones are avaliable", ITEMDRAW_DISABLED);
+		AddMenuItem(Menu2, "", "No zones are avaliable", ITEMDRAW_DISABLED);
 	}
-	SetMenuExitBackButton(Menu, true);
-	DisplayMenu(Menu, client, MENU_TIME_FOREVER);
+	SetMenuExitBackButton(Menu2, true);
+	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
 public EditorMenu(client)
@@ -796,69 +796,69 @@ public EditorMenu(client)
 		DrawBeamBox(client);
 		g_Editing[client]=2;
 	}
-	new Handle:Menu = CreateMenu(MenuHandler_Editor);
+	new Handle:Menu2 = CreateMenu(MenuHandler_Editor);
 	if(g_ClientSelectedZone[client] != -1)
-		SetMenuTitle(Menu, "Zone Editor (MODIFY)");
+		SetMenuTitle(Menu2, "Zone Editor (MODIFY)");
 	else
-		SetMenuTitle(Menu, "Zone Editor");
+		SetMenuTitle(Menu2, "Zone Editor");
 		
 	if(g_Editing[client]==0)
-		AddMenuItem(Menu, "", "Start Zone");
+		AddMenuItem(Menu2, "", "Start Zone");
 	else
-		AddMenuItem(Menu, "", "Restart Zone");
+		AddMenuItem(Menu2, "", "Restart Zone");
 		
 	if(g_Editing[client]>0)
 	{
-		AddMenuItem(Menu, "", "Set Zone name");
+		AddMenuItem(Menu2, "", "Set Zone name");
 		if(g_Editing[client]==2)
-			AddMenuItem(Menu, "", "Continue Editing");
+			AddMenuItem(Menu2, "", "Continue Editing");
 		else
-			AddMenuItem(Menu, "", "Pause Editing");
-		AddMenuItem(Menu, "", "Cancel Zone");
-		AddMenuItem(Menu, "", "Save Zone");
+			AddMenuItem(Menu2, "", "Pause Editing");
+		AddMenuItem(Menu2, "", "Cancel Zone");
+		AddMenuItem(Menu2, "", "Save Zone");
 		switch(g_CurrentZoneTeam[client])
 		{
 			case 0:
 			{
-				AddMenuItem(Menu, "", "Set Zone Yellow");
+				AddMenuItem(Menu2, "", "Set Zone Yellow");
 			}
 			case 1:
 			{
-				AddMenuItem(Menu, "", "Set Zone Green");
+				AddMenuItem(Menu2, "", "Set Zone Green");
 			}
 			case 2:
 			{
-				AddMenuItem(Menu, "", "Set Zone Red");
+				AddMenuItem(Menu2, "", "Set Zone Red");
 			}
 			case 3:
 			{
-				AddMenuItem(Menu, "", "Set Zone Blue");
+				AddMenuItem(Menu2, "", "Set Zone Blue");
 			}
 		}
-		AddMenuItem(Menu, "", "Go to Zone");
-		AddMenuItem(Menu, "", "Strech Zone");
+		AddMenuItem(Menu2, "", "Go to Zone");
+		AddMenuItem(Menu2, "", "Strech Zone");
 		switch(g_CurrentZoneVis[client])
 		{
 			case 0:
 			{
-				AddMenuItem(Menu, "", "Visibility: No One");
+				AddMenuItem(Menu2, "", "Visibility: No One");
 			}
 			case 1:
 			{
-				AddMenuItem(Menu, "", "Visibility: All");
+				AddMenuItem(Menu2, "", "Visibility: All");
 			}
 			case 2:
 			{
-				AddMenuItem(Menu, "", "Visibility: T");
+				AddMenuItem(Menu2, "", "Visibility: T");
 			}
 			case 3:
 			{
-				AddMenuItem(Menu, "", "Visibility: CT");
+				AddMenuItem(Menu2, "", "Visibility: CT");
 			}
 		}
 	}
-	SetMenuExitBackButton(Menu, true);
-	DisplayMenu(Menu, client, MENU_TIME_FOREVER);
+	SetMenuExitBackButton(Menu2, true);
+	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
 public MenuHandler_Editor(Handle:tMenu, MenuAction:action, client, item)
@@ -1029,23 +1029,23 @@ new g_ClientSelectedPoint[MAXPLAYERS+1];
 public ScaleMenu(client)
 {
 	g_Editing[client]=3;
-	new Handle:Menu = CreateMenu(MenuHandler_Scale);
-	SetMenuTitle(Menu, "Strech Zone");
+	new Handle:Menu2 = CreateMenu(MenuHandler_Scale);
+	SetMenuTitle(Menu2, "Strech Zone");
 	if(g_ClientSelectedPoint[client]==1)
-		AddMenuItem(Menu, "", "Point B");
+		AddMenuItem(Menu2, "", "Point B");
 	else
-		AddMenuItem(Menu, "", "Point A");
-	AddMenuItem(Menu, "", "+ Width");
-	AddMenuItem(Menu, "", "- Width");
-	AddMenuItem(Menu, "", "+ Height");
-	AddMenuItem(Menu, "", "- Height");
-	AddMenuItem(Menu, "", "+ Length");
-	AddMenuItem(Menu, "", "- Length");
+		AddMenuItem(Menu2, "", "Point A");
+	AddMenuItem(Menu2, "", "+ Width");
+	AddMenuItem(Menu2, "", "- Width");
+	AddMenuItem(Menu2, "", "+ Height");
+	AddMenuItem(Menu2, "", "- Height");
+	AddMenuItem(Menu2, "", "+ Length");
+	AddMenuItem(Menu2, "", "- Length");
 	decl String:ScaleSize[128];
 	Format(ScaleSize, sizeof(ScaleSize), "Scale Size %f", g_AvaliableScales[g_ClientSelectedScale[client]]);
-	AddMenuItem(Menu, "", ScaleSize);
-	SetMenuExitBackButton(Menu, true);
-	DisplayMenu(Menu, client, MENU_TIME_FOREVER);
+	AddMenuItem(Menu2, "", ScaleSize);
+	SetMenuExitBackButton(Menu2, true);
+	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
 public MenuHandler_Scale(Handle:tMenu, MenuAction:action, client, item)
@@ -1153,12 +1153,12 @@ public GetClientSelectedZone(client, Float:poses[2][3], &team, &vis)
 
 public ClearZonesMenu(client)
 {
-	new Handle:Menu = CreateMenu(MenuHandler_ClearZones);
-	SetMenuTitle(Menu, "Are you sure, you want to clear all zones on this map?");
-	AddMenuItem(Menu, "","NO GO BACK!");
-	AddMenuItem(Menu, "","NO GO BACK!");
-	AddMenuItem(Menu, "","YES! DO IT!");
-	DisplayMenu(Menu, client, 20);
+	new Handle:Menu2 = CreateMenu(MenuHandler_ClearZones);
+	SetMenuTitle(Menu2, "Are you sure, you want to clear all zones on this map?");
+	AddMenuItem(Menu2, "","NO GO BACK!");
+	AddMenuItem(Menu2, "","NO GO BACK!");
+	AddMenuItem(Menu2, "","YES! DO IT!");
+	DisplayMenu(Menu2, client, 20);
 }
 
 public MenuHandler_ClearZones(Handle:tMenu, MenuAction:action, client, item)
