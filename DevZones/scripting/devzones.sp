@@ -7,7 +7,7 @@
 
 
 
-#define VERSION "2.0"
+#define VERSION "2.1.1"
 
 
 
@@ -61,7 +61,7 @@ public Plugin:myinfo =
 	author = "Franc1sco franug",
 	description = "zones plugin",
 	version = VERSION,
-	url = "http://www.clanuea.com/"
+	url = "http://steamcommunity.com/id/franug"
 };
 
 public OnPluginStart()
@@ -69,11 +69,12 @@ public OnPluginStart()
 	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
-	cvar_model = CreateConVar("sm_devzones_model", "models/items/cs_gift.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
+	cvar_model = CreateConVar("sm_devzones_model", "models/props/de_train/barrel.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
 	g_Zones = CreateArray(256);
 	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_ROOT);
 	RegConsoleCmd("say",fnHookSay);
-	HookEvent("round_start", Event_OnRoundStart);
+	HookEventEx("round_start", Event_OnRoundStart);
+	HookEventEx("teamplay_round_start", Event_OnRoundStart);
 	//HookEvent("round_start", OnRoundStart);
 
 	ReadZones();
@@ -171,7 +172,7 @@ CreateZoneEntity(Float:fMins[3], Float:fMaxs[3], String:sZoneName[64])
 public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay)
 {	
 	// Ignore dead players
-	if(activator < 1 || activator > MaxClients || !IsPlayerAlive(activator))
+	if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) ||!IsPlayerAlive(activator))
 		return;
 		
 	decl String:sTargetName[256];
@@ -192,7 +193,7 @@ public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay
 public EntOut_OnEndTouch(const String:output[], caller, activator, Float:delay)
 {	
 	// Ignore dead players
-	if(activator < 1 || activator > MaxClients || !IsPlayerAlive(activator))
+	if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
 		return;
 		
 	decl String:sTargetName[256];
@@ -227,9 +228,16 @@ public Action:OnRoundStart(Handle:event, const String:name[], bool:dontBroadcast
 
 public OnMapStart()
 {
+	OnConfigsExecuted();
+}
+
+public OnConfigsExecuted()
+{
 	GetCVars();
-	g_BeamSprite = PrecacheModel("materials/sprites/laser.vmt");
-	g_HaloSprite = PrecacheModel("materials/sprites/halo01.vmt");
+	g_BeamSprite = PrecacheModel("sprites/laserbeam.vmt");
+	g_HaloSprite = PrecacheModel("materials/sprites/halo.vmt");
+	//if(!g_BeamSprite) LogError("El modelo beam no funciona");
+	//if(!g_HaloSprite) LogError("El modelo Halo no funciona");
 	PrecacheModel(model);
 	ReadZones();
 }
