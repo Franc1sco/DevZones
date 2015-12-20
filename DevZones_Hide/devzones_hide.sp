@@ -3,7 +3,6 @@
 #include <sdktools>
 #include <sdkhooks>
 #include <devzones>
-#include <zombiereloaded>
 #include <multicolors>
 
 new bool:hide[MAXPLAYERS+1];
