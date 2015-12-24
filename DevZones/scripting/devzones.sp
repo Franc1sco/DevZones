@@ -417,12 +417,13 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	hOnClientEntry = CreateGlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
 	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
-	//CreateNative("Zone_IsClientInZone", Native_InZone);
+	CreateNative("Zone_IsClientInZone", Native_InZone);
 	CreateNative("Zone_GetZonePosition", Native_Teleport);
+	CreateNative("Zone_CheckIfZoneExists", Native_ZoneExist);
     
 	return APLRes_Success;
 }
-/*
+
 public Native_InZone(Handle:plugin, argc)
 {  
 	
@@ -449,7 +450,7 @@ public Native_InZone(Handle:plugin, argc)
 				
 	}
 	return false;
-}*/
+}
 
 public Native_Teleport(Handle:plugin, argc)
 {  
@@ -477,6 +478,28 @@ public Native_Teleport(Handle:plugin, argc)
 				SetNativeArray(3, ZonePos, 3);
 				return true;
 			}
+		}
+	}
+	return false;
+}
+
+public Native_ZoneExist(Handle:plugin, argc)
+{  
+	
+	decl String:name[64], String:namezone[64];
+	
+	GetNativeString(1, name, 64);
+	new bool:igual = GetNativeCell(2);
+	new bool:sensitive = GetNativeCell(3);
+	
+	new size = GetArraySize(g_Zones);
+	if(size>0)
+	{
+		for(new i=0;i<size;++i)
+		{
+			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
+			if(igual) if(StrEqual(name, namezone, sensitive)) return true;
+			else if(StrContains(name, namezone, sensitive) == 0) return true;
 		}
 	}
 	return false;
