@@ -11,7 +11,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - AntiCamp",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.0",
+	version = "2.0",
 	url = "http://www.clanuea.com/"
 };
 
@@ -36,6 +36,9 @@ public OnClientDisconnect(client)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if((StrContains(zone, "AntiCampCT", false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, "AntiCampTT", false) == 0 && GetClientTeam(client) == 2))
 	{
 		new seconds = GetConVarInt(cvar_time);
@@ -46,6 +49,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if((StrContains(zone, "AntiCampCT", false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, "AntiCampTT", false) == 0 && GetClientTeam(client) == 2))
 	{
 		if (g_hClientTimers[client] != INVALID_HANDLE)

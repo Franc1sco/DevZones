@@ -13,7 +13,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - Hide",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.0",
+	version = "2.0",
 	url = "http://www.zeuszombie.com/"
 };
 
@@ -50,6 +50,9 @@ public Action:Pasado(Handle:timer, any:client)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "hide", false) != 0) return;
 	
 	PrintHintText(client, "You entered in a hide teammates zone to improve the vision");
@@ -61,6 +64,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "hide", false) != 0) return;
 	
 	PrintHintText(client, "You left the hide teammates zone");

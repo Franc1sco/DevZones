@@ -17,7 +17,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - Infinite Ammo",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.0",
+	version = "2.0",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -26,13 +26,13 @@ public OnPluginStart()
 	HookEvent("player_spawn", PlayerSpawn);
 	HookEvent("weapon_fire", EventWeaponFire);
 	
-	activeOffset = FindSendPropOffs("CAI_BaseNPC", "m_hActiveWeapon");
+	activeOffset = FindSendPropInfo("CAI_BaseNPC", "m_hActiveWeapon");
 	
-	clip1Offset = FindSendPropOffs("CBaseCombatWeapon", "m_iClip1");
-	clip2Offset = FindSendPropOffs("CBaseCombatWeapon", "m_iClip2");
+	clip1Offset = FindSendPropInfo("CBaseCombatWeapon", "m_iClip1");
+	clip2Offset = FindSendPropInfo("CBaseCombatWeapon", "m_iClip2");
 	
-	priAmmoTypeOffset = FindSendPropOffs("CBaseCombatWeapon", "m_iPrimaryAmmoCount");
-	secAmmoTypeOffset = FindSendPropOffs("CBaseCombatWeapon", "m_iSecondaryAmmoCount");
+	priAmmoTypeOffset = FindSendPropInfo("CBaseCombatWeapon", "m_iPrimaryAmmoCount");
+	secAmmoTypeOffset = FindSendPropInfo("CBaseCombatWeapon", "m_iSecondaryAmmoCount");
 }
 
 public Action:PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
@@ -50,6 +50,9 @@ public Action:Pasado(Handle:timer, any:userid)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+			
 	if(StrContains(zone, "ammo", false) != 0) return;
 	PrintHintText(client, "UNLIMITED AMMO ZONE");
 	infiniteammo[client] = true;
@@ -57,6 +60,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "ammo", false) != 0) return;
 	
 	infiniteammo[client] = false;

@@ -16,7 +16,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.0",
+	version = "2.0",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -29,6 +29,9 @@ public OnClientDisconnect(client)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
 		Zone_GetZonePosition(zone, false, zone_pos[client]);
@@ -39,6 +42,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
 		if (g_hClientTimers[client] != INVALID_HANDLE)

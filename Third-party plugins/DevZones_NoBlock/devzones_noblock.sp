@@ -15,7 +15,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - NoBlock",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.1",
+	version = "2.0",
 	url = "http://www.cola-team.es"
 };
 
@@ -32,6 +32,9 @@ public EventPlayerSpawn(Handle:event,const String:name[],bool:dontBroadcast)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
 		noblock[client] = true;
@@ -40,6 +43,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
 		noblock[client] = false;

@@ -15,7 +15,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - Slap",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.1",
 	url = "http://www.clanuea.com/"
 };
 
@@ -30,6 +30,9 @@ public OnClientDisconnect(client)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if((StrContains(zone, ZONE_PREFIX_CT, false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, ZONE_PREFIX_TT, false) == 0 && GetClientTeam(client) == 2) || StrContains(zone, ZONE_PREFIX_ANY, false) == 0)
 	{
 		g_hClientTimers[client] = CreateTimer(REPEAT_VALUE, Timer_Repeat, client, TIMER_REPEAT);
@@ -38,6 +41,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if((StrContains(zone, ZONE_PREFIX_CT, false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, ZONE_PREFIX_TT, false) == 0 && GetClientTeam(client) == 2) || StrContains(zone, ZONE_PREFIX_ANY, false) == 0)
 	{
 		if (g_hClientTimers[client] != INVALID_HANDLE)

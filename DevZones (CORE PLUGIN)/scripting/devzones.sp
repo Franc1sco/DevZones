@@ -1,14 +1,9 @@
-// Based in the plugin "Anti Spawn Camp" of Imdawe
-
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 
 
-
-
-#define VERSION "2.2.1"
-
+#define VERSION "2.2.2"
 
 
 new beamColorT[4] = {255, 0, 0, 255};
@@ -44,10 +39,12 @@ new g_zonas[MAXPLAYERS+1][192][listado]; // max zones = 192
 
 // cvars
 
+new Handle:cvar_filter;
 new Handle:cvar_mode;
 new Handle:cvar_checker;
 new Handle:cvar_model;
 
+new bool:g_bfilter;
 new Float:checker;
 new bool:mode_plugin;
 new String:model[192];
@@ -66,12 +63,13 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	cvar_filter = CreateConVar("sm_devzones_filter", "1", "0 = Only allow valid alive clients to be detected in the native zones. 1 = Detect entities and all (you need to add more checkers in the third party plugins).");
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
 	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
 	g_Zones = CreateArray(256);
-	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_ROOT);
+	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_CUSTOM6);
 	RegConsoleCmd("say",fnHookSay);
 	HookEventEx("round_start", Event_OnRoundStart);
 	HookEventEx("teamplay_round_start", Event_OnRoundStart);
@@ -79,9 +77,11 @@ public OnPluginStart()
 
 	ReadZones();
 	
+	HookConVarChange(cvar_filter, CVarChange);
 	HookConVarChange(cvar_checker, CVarChange);
 	HookConVarChange(cvar_mode, CVarChange);
 	HookConVarChange(cvar_model, CVarChange);
+	
 }
 
 public CVarChange(Handle:convar_hndl, const String:oldValue[], const String:newValue[])
@@ -92,6 +92,7 @@ public CVarChange(Handle:convar_hndl, const String:oldValue[], const String:newV
 // Get new values of cvars if they has being changed
 public GetCVars()
 {
+	g_bfilter = GetConVarBool(cvar_filter);
 	mode_plugin = GetConVarBool(cvar_mode);
 	checker = GetConVarFloat(cvar_checker);
 	GetConVarString(cvar_model, model, 192);
@@ -172,8 +173,9 @@ CreateZoneEntity(Float:fMins[3], Float:fMaxs[3], String:sZoneName[64])
 public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay)
 {	
 	// Ignore dead players
-	if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) ||!IsPlayerAlive(activator))
-		return;
+	if(g_bfilter) 
+		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) ||!IsPlayerAlive(activator)) 
+			return;
 		
 	decl String:sTargetName[256];
 	GetEntPropString(caller, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
@@ -193,8 +195,9 @@ public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay
 public EntOut_OnEndTouch(const String:output[], caller, activator, Float:delay)
 {	
 	// Ignore dead players
-	if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
-		return;
+	if(g_bfilter)
+		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
+			return;
 		
 	decl String:sTargetName[256];
 	GetEntPropString(caller, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));

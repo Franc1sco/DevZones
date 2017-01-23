@@ -9,12 +9,15 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - Teleport",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.0",
+	version = "2.0",
 	url = "http://www.clanuea.com/"
 };
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "teleport", false) == 0)
 	{
 		decl String:targetzone[64], Float:Position[3];

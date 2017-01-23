@@ -11,7 +11,7 @@ public Plugin:myinfo =
 	name = "SM DEV Zones - NoDamage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "1.1",
+	version = "2.0",
 	url = "http://www.cola-team.es"
 };
 
@@ -44,6 +44,9 @@ public Action:SpawnTimer(Handle:timer, any:client)
 
 public Zone_OnClientEntry(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "nodamage", false) != 0) return;
 	
 	nodamage[client] = true;
@@ -51,6 +54,9 @@ public Zone_OnClientEntry(client, String:zone[])
 
 public Zone_OnClientLeave(client, String:zone[])
 {
+	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+		return;
+		
 	if(StrContains(zone, "nodamage", false) != 0) return;
 	
 	nodamage[client] = false;
