@@ -18,6 +18,11 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	HookEvent("player_spawn", PlayerSpawn);
+	for(int i = 1; i <= MaxClients; i++)
+		if(IsClientInGame(i))
+		{
+			OnClientPutInServer(i);
+		}
 }
 
 public Action:PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
