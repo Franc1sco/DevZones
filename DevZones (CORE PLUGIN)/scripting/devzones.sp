@@ -3,7 +3,7 @@
 #include <sdktools>
 
 
-#define VERSION "2.2.2"
+#define VERSION "2.2.3"
 
 
 new beamColorT[4] = {255, 0, 0, 255};
@@ -174,7 +174,7 @@ public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay
 {	
 	// Ignore dead players
 	if(g_bfilter) 
-		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) ||!IsPlayerAlive(activator)) 
+		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator)) 
 			return;
 		
 	decl String:sTargetName[256];
