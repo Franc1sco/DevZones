@@ -172,7 +172,6 @@ CreateZoneEntity(Float:fMins[3], Float:fMaxs[3], String:sZoneName[64])
 
 public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay)
 {	
-	// Ignore dead players
 	if(g_bfilter) 
 		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator)) 
 			return;
@@ -194,9 +193,8 @@ public EntOut_OnStartTouch(const String:output[], caller, activator, Float:delay
 
 public EntOut_OnEndTouch(const String:output[], caller, activator, Float:delay)
 {	
-	// Ignore dead players
 	if(g_bfilter)
-		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
+		if(activator < 1 || activator > MaxClients || !IsClientInGame(activator))
 			return;
 		
 	decl String:sTargetName[256];
