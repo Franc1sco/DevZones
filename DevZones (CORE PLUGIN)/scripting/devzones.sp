@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "2.2.3"
+#define VERSION "2.2.4"
 
 
 new beamColorT[4] = {255, 0, 0, 255};
@@ -81,7 +81,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	CreateConVar("sm_DevZones", VERSION, "plugin", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	cvar_filter = CreateConVar("sm_devzones_filter", "1", "0 = Only allow valid alive clients to be detected in the native zones. 1 = Detect entities and all (you need to add more checkers in the third party plugins).");
+	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
 	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
@@ -245,11 +245,6 @@ public Action:OnRoundStart(Handle:event, const String:name[], bool:dontBroadcast
 }*/
 
 public OnMapStart()
-{
-	OnConfigsExecuted();
-}
-
-public OnConfigsExecuted()
 {
 	GetCVars();
 	g_BeamSprite = PrecacheModel("sprites/laserbeam.vmt");
