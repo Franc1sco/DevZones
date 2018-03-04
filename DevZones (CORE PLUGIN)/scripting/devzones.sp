@@ -1,3 +1,20 @@
+/*  SM DEV Zones
+ *
+ *  Copyright (C) 2017-2018 Francisco 'Franc1sco' García and Totenfluch
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) 
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see http://www.gnu.org/licenses/.
+ */
+
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
@@ -49,18 +66,18 @@ Handle cvar_model;
 bool g_bfilter;
 float checker;
 bool mode_plugin;
-char model[192];
+char sModel[192];
 
 Handle cvar_timer = INVALID_HANDLE;
 
 // PLUGIN INFO
-public Plugin myinfo = 
+public Plugin myinfo =
 {
-	name = "[T-RP] Zones", 
-	author = "Franc1sco, root, Totenfluch", 
-	description = "Adds Custom Zones", 
-	version = VERSION, 
-	url = "https://forums.alliedmods.net/showthread.php?t=224839"
+	name = "SM DEV Zones",
+	author = "Franc1sco, root, Totenfluch",
+	description = "Adds Custom Zones",
+	version = VERSION,
+	url = "https://github.com/Franc1sco/DevZones"
 };
 
 public void OnPluginStart() {
@@ -98,7 +115,7 @@ public void GetCVars() {
 	g_bfilter = GetConVarBool(cvar_filter);
 	mode_plugin = GetConVarBool(cvar_mode);
 	checker = GetConVarFloat(cvar_checker);
-	GetConVarString(cvar_model, model, 192);
+	GetConVarString(cvar_model, sModel, 192);
 	
 	if (cvar_timer != INVALID_HANDLE) {
 		KillTimer(cvar_timer);
@@ -135,7 +152,7 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	GetMiddleOfABox(fMins, fMaxs, fMiddle);
 	
 	TeleportEntity(iEnt, fMiddle, NULL_VECTOR, NULL_VECTOR);
-	SetEntityModel(iEnt, model);
+	SetEntityModel(iEnt, sModel);
 	
 	
 	// Have the mins always be negative
@@ -233,7 +250,7 @@ public void OnConfigsExecuted() {
 	GetCVars();
 	g_BeamSprite = PrecacheModel("sprites/laserbeam.vmt");
 	g_HaloSprite = PrecacheModel("materials/sprites/halo.vmt");
-	PrecacheModel(model);
+	PrecacheModel(sModel);
 	ReadZones();
 }
 

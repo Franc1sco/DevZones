@@ -1,8 +1,8 @@
 /** Double-include prevention */
-#if defined _rpg_devzones_included_
-#endinput
+#if defined _devzones_included_
+  #endinput
 #endif
-#define _rpg_devzones_included_
+#define _devzones_included_
 
 
 /**
