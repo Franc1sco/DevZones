@@ -21,7 +21,7 @@
 #include <smlib>
 
 
-#define VERSION "3.0"
+#define VERSION "3.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -891,7 +891,7 @@ public void EditorMenu(int client) {
 	if (g_Editing[client] == 0)
 		AddMenuItem(Menu2, "", "Start Zone");
 	else
-		AddMenuItem(Menu2, "", "RliThisrt Zone");
+		AddMenuItem(Menu2, "", "Restart Zone");
 	
 	if (g_Editing[client] > 0)
 	{
