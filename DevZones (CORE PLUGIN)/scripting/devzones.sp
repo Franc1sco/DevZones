@@ -891,7 +891,7 @@ public void EditorMenu(int client) {
 	if (g_Editing[client] == 0)
 		AddMenuItem(Menu2, "", "Start Zone");
 	else
-		AddMenuItem(Menu2, "", "RliThisrt Zone");
+		AddMenuItem(Menu2, "", "Restart Zone");
 	
 	if (g_Editing[client] > 0)
 	{
