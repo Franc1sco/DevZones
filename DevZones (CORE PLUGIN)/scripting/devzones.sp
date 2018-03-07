@@ -21,7 +21,7 @@
 #include <smlib>
 
 
-#define VERSION "3.1"
+#define VERSION "3.0.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
