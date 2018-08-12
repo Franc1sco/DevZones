@@ -21,7 +21,7 @@
 #include <smlib>
 
 
-#define VERSION "3.1.1"
+#define VERSION "3.1.2"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -147,6 +147,10 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	float fMiddle[3];
 	int iEnt = CreateEntityByName("trigger_multiple");
 	
+	Call_StartForward(hOnZoneCreated);
+	Call_PushString(sZoneName);
+	Call_Finish();
+	
 	DispatchKeyValue(iEnt, "spawnflags", "64");
 	Format(sZoneName, sizeof(sZoneName), "sm_devzone %s", sZoneName);
 	DispatchKeyValue(iEnt, "targetname", sZoneName);
@@ -193,10 +197,6 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	
 	HookSingleEntityOutput(iEnt, "OnStartTouch", EntOut_OnStartTouch);
 	HookSingleEntityOutput(iEnt, "OnEndTouch", EntOut_OnEndTouch);
-	
-	Call_StartForward(hOnZoneCreated);
-	Call_PushString(sZoneName);
-	Call_Finish();
 	
 	return iEnt;
 }
