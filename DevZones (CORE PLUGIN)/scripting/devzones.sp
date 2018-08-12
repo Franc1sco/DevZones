@@ -21,7 +21,7 @@
 #include <smlib>
 
 
-#define VERSION "3.0.1"
+#define VERSION "3.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -53,7 +53,7 @@ enum g_eList {
 	bool:liThis
 };
 
-int g_iZones[MAXPLAYERS + 1][MAX_ZONES][g_eList]; // max zones = 256
+int g_iZones[2048][MAX_ZONES][g_eList]; // max zones = 256
 
 
 // cvars
@@ -81,7 +81,7 @@ public Plugin myinfo =
 };
 
 public void OnPluginStart() {
-	cvar_filter = CreateConVar("sm_devzones_filter", "1", "0 = Only allow valid alive clients to be detected in the native zones. 1 = Detect entities and all (you need to add more checkers in the third party plugins).");
+	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
 	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
@@ -92,13 +92,18 @@ public void OnPluginStart() {
 	HookEventEx("teamplay_round_start", Event_OnRoundStart);
 	//HookEvent("round_start", OnRoundStart);
 	
-	ReadZones();
+	GetCVars();
 	
 	HookConVarChange(cvar_filter, CVarChange);
 	HookConVarChange(cvar_checker, CVarChange);
 	HookConVarChange(cvar_mode, CVarChange);
 	HookConVarChange(cvar_model, CVarChange);
 	
+}
+
+public void OnPluginEnd()
+{
+	RemoveZones();
 }
 
 public void resetClient(int client) {
@@ -140,7 +145,7 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	float fMiddle[3];
 	int iEnt = CreateEntityByName("trigger_multiple");
 	
-	DispatchKeyValue(iEnt, "spawnflags", "64");
+	DispatchKeyValue(iEnt, "spawnflags", "72");
 	Format(sZoneName, sizeof(sZoneName), "sm_devzone %s", sZoneName);
 	DispatchKeyValue(iEnt, "targetname", sZoneName);
 	DispatchKeyValue(iEnt, "wait", "0");
@@ -241,17 +246,17 @@ public void EntOut_OnEndTouch(const char[] output, int caller, int activator, fl
 }
 
 public void OnMapStart() {
-	OnConfigsExecuted();
-	for (int i = 1; i < MAXPLAYERS; i++)
-	resetClient(i);
-}
 
-public void OnConfigsExecuted() {
-	GetCVars();
+	for (int i = 1; i < MAXPLAYERS; i++)
+		resetClient(i);
+	
+	
 	g_BeamSprite = PrecacheModel("sprites/laserbeam.vmt");
 	g_HaloSprite = PrecacheModel("materials/sprites/halo.vmt");
 	PrecacheModel(sModel);
+	
 	ReadZones();
+	RefreshZones();
 }
 
 public void OnMapEnd() {
