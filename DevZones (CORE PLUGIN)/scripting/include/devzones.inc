@@ -69,3 +69,9 @@ native Zone_GetZonePosition(String:zone[], bool:caseSensitive = false, Float:Pos
 		@return true if zone found false if not
 	*/
 native bool Zone_getMostRecentActiveZone(int client, char zoneBuffer[64]); 
+
+/**
+ * Called when a zone is created.
+ * @String zone   Zone name.
+ */
+forward Zone_OnCreated(String:zone[]);

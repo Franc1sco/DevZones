@@ -21,7 +21,7 @@
 #include <smlib>
 
 
-#define VERSION "3.1"
+#define VERSION "3.1.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -69,6 +69,8 @@ bool mode_plugin;
 char sModel[192];
 
 Handle cvar_timer = INVALID_HANDLE;
+
+Handle hOnZoneCreated;
 
 // PLUGIN INFO
 public Plugin myinfo =
@@ -145,14 +147,13 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	float fMiddle[3];
 	int iEnt = CreateEntityByName("trigger_multiple");
 	
-	DispatchKeyValue(iEnt, "spawnflags", "72");
+	DispatchKeyValue(iEnt, "spawnflags", "64");
 	Format(sZoneName, sizeof(sZoneName), "sm_devzone %s", sZoneName);
 	DispatchKeyValue(iEnt, "targetname", sZoneName);
 	DispatchKeyValue(iEnt, "wait", "0");
 	
 	DispatchSpawn(iEnt);
 	ActivateEntity(iEnt);
-	SetEntProp(iEnt, Prop_Data, "m_spawnflags", 64);
 	
 	GetMiddleOfABox(fMins, fMaxs, fMiddle);
 	
@@ -192,6 +193,10 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	
 	HookSingleEntityOutput(iEnt, "OnStartTouch", EntOut_OnStartTouch);
 	HookSingleEntityOutput(iEnt, "OnEndTouch", EntOut_OnEndTouch);
+	
+	Call_StartForward(hOnZoneCreated);
+	Call_PushString(sZoneName);
+	Call_Finish();
 	
 	return iEnt;
 }
@@ -442,6 +447,7 @@ public Action fnHookSay(int client, int args) {
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
 	hOnClientEntry = CreateGlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
 	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
+	hOnZoneCreated = CreateGlobalForward("Zone_OnCreated", ET_Ignore, Param_String);
 	CreateNative("Zone_IsClientInZone", Native_InZone);
 	CreateNative("Zone_GetZonePosition", Native_Teleport);
 	CreateNative("Zone_CheckIfZoneExists", Native_ZoneExist);
