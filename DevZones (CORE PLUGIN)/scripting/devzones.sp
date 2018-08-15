@@ -18,10 +18,9 @@
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
-#include <smlib>
 
 
-#define VERSION "3.1.2"
+#define VERSION "3.1.3"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -1330,3 +1329,31 @@ stock void RemoveZones()
 		}
 	}
 } 
+
+/**
+ * Gets the Global Name of an entity.
+ *
+ * @param entity            Entity index.
+ * @param buffer            Return/Output buffer.
+ * @param size        Max size of buffer.
+ * @return          Number of non-null bytes written.
+ */
+stock int Entity_GetGlobalName(int entity, char[] buffer, int size)
+{
+    return GetEntPropString(entity, Prop_Data, "m_iGlobalname", buffer, size);
+}
+
+/**
+ * Sets the Global Name of an entity.
+ *
+ * @param entity            Entity index.
+ * @param name        The global name you want to set.
+ * @return          True on success, false otherwise.
+ */
+stock bool Entity_SetGlobalName(int entity, const char[] name, any:...)
+{
+    char format[128];
+    VFormat(format, sizeof(format), name, 3);
+
+    return DispatchKeyValue(entity, "globalname", format);
+}
