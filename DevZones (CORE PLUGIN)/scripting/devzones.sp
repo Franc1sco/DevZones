@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "3.1.3"
+#define VERSION "3.2"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -298,6 +298,15 @@ public void getZoneTeamColor(int team, int color[4]) {
 }
 
 public void ReadZones() {
+	
+	int size = GetArraySize(g_Zones);
+	if(size > 0)
+	{
+		for (int i = 0; i < size; ++i)
+		{
+			CloseHandle(GetArrayCell(g_Zones, i));
+		}
+	}
 	ClearArray(g_Zones);
 	char Path[512];
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones");
