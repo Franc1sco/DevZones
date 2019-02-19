@@ -14,7 +14,7 @@
  * @bool caseSensitive     If true, comparison is case sensitive. If false, comparison is case insensitive.
  * @return true if player are there in the zone given in Zone String
  */
-native bool Zone_IsClientInZone(int client, char [] zone, bool equal = true, bool caseSensitive = false);
+native bool Zone_IsClientInZone(int client, const char[] zone, bool equal = true, bool caseSensitive = false);
 
 /**
  * Check if a position is in a zone
@@ -26,7 +26,7 @@ native bool Zone_IsClientInZone(int client, char [] zone, bool equal = true, boo
  * @float posx      Z-Pos
  * @return true if position is in a zone or not
  */
-native bool Zone_isPositionInZone(char[] zone, float posx, float posy, float posz, bool equal = true);
+native bool Zone_isPositionInZone(const char[] zone, float posx, float posy, float posz, bool equal = true);
 
 /**
  * Check if zone exists
@@ -36,21 +36,21 @@ native bool Zone_isPositionInZone(char[] zone, float posx, float posy, float pos
  * @bool caseSensitive     If true, comparison is case sensitive. If false, comparison is case insensitive.
  * @return true if zone exist
  */
-native bool Zone_CheckIfZoneExists(char [] zone, bool equal = true, bool caseSensitive = false);
+native bool Zone_CheckIfZoneExists(const char [] zone, bool equal = true, bool caseSensitive = false);
 
 /**
  * Called when a player has entered in a zone.
  * @param client   client that has entered in the zone.
  * @String zone   Zone name.
  */
-forward void Zone_OnClientEntry(int client, char [] zone);
+forward void Zone_OnClientEntry(int client, const char [] zone);
 
 /**
  * Called when a player has left a zone.
  * @param client   client that has left the zone.
  * @String zone   Zone name.
  */
-forward void Zone_OnClientLeave(int client, char [] zone);
+forward void Zone_OnClientLeave(int client, const char [] zone);
 
 /**
  * Get a zone position
@@ -59,19 +59,18 @@ forward void Zone_OnClientLeave(int client, char [] zone);
  * @Float Position   Array when the zone position will be copied
  * @return true on successfully, false otherwise
  */
-native int Zone_GetZonePosition(char [] zone, bool caseSensitive = false, float Position[3]);
+native int Zone_GetZonePosition(const char [] zone, bool caseSensitive = false, float Position[3]);
 
 
-/*
-		@Param1 -> int client
-		@Param2 -> char[64] zoneBuffer
-	
-		@return true if zone found false if not
-	*/
+/**
+ * @Param1 -> int client
+ * @Param2 -> char[64] zoneBuffer	
+ * @return true if zone found false if not
+ */
 native bool Zone_getMostRecentActiveZone(int client, char zoneBuffer[64]); 
 
 /**
  * Called when a zone is created.
  * @String zone   Zone name.
  */
-forward void Zone_OnCreated(char [] zone);
+forward void Zone_OnCreated(const char [] zone);
