@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "3.3"
+#define VERSION "3.3.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -112,6 +112,8 @@ public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadca
 
 public void OnEntityDestroyed(int entity)
 {
+	if (entity < 0 || entity > 2048)return;
+	
 	resetClient(entity);
 }
 //
