@@ -1,6 +1,6 @@
 /*  SM DEV Zones
  *
- *  Copyright (C) 2017-2018 Francisco 'Franc1sco' García and Totenfluch
+ *  Copyright (C) 2017-2020 Francisco 'Franc1sco' García and Totenfluch
  * 
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "3.3.1"
+#define VERSION "3.3.2"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -336,6 +336,7 @@ public void ReadZones() {
 		ExplodeString(map, "/", mapPart, 3, 64);
 		strcopy(map, sizeof(map), mapPart[2]);
 	}
+	StringToLowerCase(map);
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones/%s.zones.txt", map);
 	if (!FileExists(Path))
 	{
@@ -382,6 +383,7 @@ public void SaveZones(int client) {
 		ExplodeString(map, "/", mapPart, 3, 64);
 		strcopy(map, sizeof(map), mapPart[2]);
 	}
+	StringToLowerCase(map);
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones/%s.zones.txt", map);
 	Handle file = OpenFile(Path, "w+");
 	CloseHandle(file);
@@ -1381,4 +1383,25 @@ stock bool Entity_SetGlobalName(int entity, const char[] name, any:...)
     VFormat(format, sizeof(format), name, 3);
 
     return DispatchKeyValue(entity, "globalname", format);
+}
+
+/**
+ * Converts the given string to lower case
+ *
+ * @param szString     Input string for conversion and also the output
+ * @return             void
+ */
+stock void StringToLowerCase(char[] szInput) 
+{
+    int iIterator = 0;
+
+    while (szInput[iIterator] != EOS) 
+    {
+        if (!IsCharLower(szInput[iIterator])) szInput[iIterator] = CharToLower(szInput[iIterator]);
+        else szInput[iIterator] = szInput[iIterator];
+
+        iIterator++;
+    }
+
+    szInput[iIterator + 1] = EOS;
 }
