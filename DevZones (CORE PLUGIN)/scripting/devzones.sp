@@ -588,21 +588,29 @@ public int Native_isPositionInZone(Handle plugin, int numParams) {
 	pos[1] = view_as<float>(GetNativeCell(3));
 	pos[2] = view_as<float>(GetNativeCell(4));
 	
+	bool same = GetNativeCell(5);
+	int found = 0;
+	
 	int size = GetArraySize(g_Zones);
 	if (size > 0) {
 		for (int i = 0; i < size; ++i) {
 			char name[64];
 			GetTrieString(GetArrayCell(g_Zones, i), "name", name, sizeof(name));
-			if (StrEqual(name, zonename)) {
-				float posA[3];
-				float posB[3];
-				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
-				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
-				return IsbetweenRect(pos, posA, posB, 0);
+			float posA[3];
+			float posB[3];
+			GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
+			GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
+			if(same)
+			{
+				if (StrEqual(name, zonename))
+					found += IsbetweenRect(pos, posA, posB, 0);
+			}else{
+				if (StrContains(name, zonename) != -1)
+					found += IsbetweenRect(pos, posA, posB, 0);
 			}
 		}
 	}
-	return 0;
+	return found;
 }
 
 public void DrawBeamBox(int client) {
