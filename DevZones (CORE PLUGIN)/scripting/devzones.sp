@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "3.3.2"
+#define VERSION "4.0"
 #pragma newdecls required
 
 #define MAX_ZONES 256
@@ -470,7 +470,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
 	hOnZoneCreated = CreateGlobalForward("Zone_OnCreated", ET_Ignore, Param_String);
 	CreateNative("Zone_IsClientInZone", Native_InZone);
-	CreateNative("Zone_GetZonePosition", Native_Teleport);
+	CreateNative("Zone_GetZonePosition", Native_GetZonePos);
+	CreateNative("Zone_GetZoneCord", Native_GetZoneCord);
 	CreateNative("Zone_CheckIfZoneExists", Native_ZoneExist);
 	CreateNative("Zone_isPositionInZone", Native_isPositionInZone);
 	/*
@@ -522,7 +523,7 @@ public int Native_getMostRecentActiveZone(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_Teleport(Handle plugin, int argc) {
+public int Native_GetZonePos(Handle plugin, int argc) {
 	char name[64];
 	char namezone[64];
 	float posA[3];
@@ -547,6 +548,35 @@ public int Native_Teleport(Handle plugin, int argc) {
 				ZonePos[1] /= 2.0;
 				ZonePos[2] /= 2.0;
 				SetNativeArray(3, ZonePos, 3);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+public int Native_GetZoneCord(Handle plugin, int argc) {
+	char name[64];
+	char namezone[64];
+	float posA[3];
+	float posB[3];
+	
+	GetNativeString(1, name, 64);
+	bool sensitive = GetNativeCell(2);
+	
+	int size = GetArraySize(g_Zones);
+	if (size > 0)
+	{
+		for (int i = 0; i < size; ++i)
+		{
+			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
+			if (StrEqual(name, namezone, sensitive))
+			{
+				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
+				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
+				
+				SetNativeArray(3, posA, 3);
+				SetNativeArray(4, posB, 3);
 				return true;
 			}
 		}
@@ -598,10 +628,10 @@ public int Native_isPositionInZone(Handle plugin, int numParams) {
 			if(same)
 			{
 				if (StrEqual(name, zonename))
-					found += IsbetweenRect(pos, posA, posB, 0);
+					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
 			}else{
 				if (StrContains(name, zonename) != -1)
-					found += IsbetweenRect(pos, posA, posB, 0);
+					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
 			}
 		}
 	}

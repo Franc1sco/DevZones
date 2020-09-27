@@ -61,6 +61,16 @@ forward void Zone_OnClientLeave(int client, const char [] zone);
  */
 native int Zone_GetZonePosition(const char [] zone, bool caseSensitive = false, float Position[3]);
 
+/**
+ * Get a zone coordinates
+ * @String zone   Zone name to search coordinates.
+ * @bool caseSensitive     If true, comparison is case sensitive. If false, comparison is case insensitive.
+ * @Float CordA   Array when the zone coordinates A will be copied
+ * @Float CordB   Array when the zone coordinates B will be copied
+ * @return true on successfully, false otherwise
+ */
+native int Zone_GetZoneCord(const char [] zone, bool caseSensitive = false, float CordA[3], float CordB[3]);
+
 
 /**
  * @Param1 -> int client
