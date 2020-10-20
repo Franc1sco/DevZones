@@ -1226,7 +1226,7 @@ public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int it
 				}
 				case 2:
 				{
-					g_Positions[client][g_ClientSelectedPoint[client]][0] += g_AvaliableScales[g_ClientSelectedScale[client]];
+					g_Positions[client][g_ClientSelectedPoint[client]][0] -= g_AvaliableScales[g_ClientSelectedScale[client]];
 				}
 				case 3:
 				{
@@ -1234,7 +1234,7 @@ public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int it
 				}
 				case 4:
 				{
-					g_Positions[client][g_ClientSelectedPoint[client]][1] += g_AvaliableScales[g_ClientSelectedScale[client]];
+					g_Positions[client][g_ClientSelectedPoint[client]][1] -= g_AvaliableScales[g_ClientSelectedScale[client]];
 				}
 				case 5:
 				{
@@ -1242,7 +1242,7 @@ public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int it
 				}
 				case 6:
 				{
-					g_Positions[client][g_ClientSelectedPoint[client]][2] += g_AvaliableScales[g_ClientSelectedScale[client]];
+					g_Positions[client][g_ClientSelectedPoint[client]][2] -= g_AvaliableScales[g_ClientSelectedScale[client]];
 				}
 				case 7:
 				{
