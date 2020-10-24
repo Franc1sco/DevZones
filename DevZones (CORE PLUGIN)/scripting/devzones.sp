@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "4.0"
+#define VERSION "4.0.1"
 #pragma newdecls required
 
 #define MAX_ZONES 256
