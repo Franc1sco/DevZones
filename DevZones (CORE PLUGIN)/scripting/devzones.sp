@@ -327,12 +327,12 @@ public void ReadZones() {
 	char Path[512];
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones");
 	if (!DirExists(Path))
-		CreateDirectory(Path, 0777);
+		CreateDirectory(Path, 0o777);
 	
 	char wsPath[512];
 	BuildPath(Path_SM, wsPath, sizeof(wsPath), "configs/dev_zones/workshop");
 	if (!DirExists(wsPath))
-		CreateDirectory(wsPath, 0777);
+		CreateDirectory(wsPath, 0o777);
 	
 	char map[64];
 	GetCurrentMap(map, sizeof(map));
