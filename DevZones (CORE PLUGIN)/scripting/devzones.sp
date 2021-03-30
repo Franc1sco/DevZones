@@ -1,6 +1,6 @@
 /*  SM DEV Zones
  *
- *  Copyright (C) 2017-2020 Francisco 'Franc1sco' García and Totenfluch
+ *  Copyright (C) 2017-2021 Francisco 'Franc1sco' García and Totenfluch
  * 
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,7 +20,7 @@
 #include <sdktools>
 
 
-#define VERSION "4.0.2"
+#define VERSION "4.0.3"
 #pragma newdecls required
 
 #define MAX_ZONES 256
