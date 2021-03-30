@@ -39,6 +39,8 @@ int g_Editing[MAXPLAYERS + 1] =  { 0, ... };
 float g_Positions[MAXPLAYERS + 1][2][3];
 int g_ClientSelectedZone[MAXPLAYERS + 1] =  { -1, ... };
 bool g_bFixName[MAXPLAYERS + 1];
+bool g_bMapStarted;
+EngineVersion g_Engine;
 
 int g_BeamSprite;
 int g_HaloSprite;
@@ -82,6 +84,8 @@ public Plugin myinfo =
 };
 
 public void OnPluginStart() {
+	g_Engine = GetEngineVersion();
+
 	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
@@ -267,9 +271,10 @@ public void EntOut_OnEndTouch(const char[] output, int caller, int activator, fl
 
 public void OnMapStart() {
 
+	g_bMapStarted = true;
+
 	for (int i = 1; i < MAXPLAYERS; i++)
 		resetClient(i);
-	
 	
 	g_BeamSprite = PrecacheModel("sprites/laserbeam.vmt");
 	g_HaloSprite = PrecacheModel("materials/sprites/halo.vmt");
@@ -281,6 +286,7 @@ public void OnMapStart() {
 
 public void OnMapEnd() {
 	SaveZones(0);
+	g_bMapStarted = false;
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon) {
@@ -728,6 +734,7 @@ public void BeamBox_OnPlayerRunCmd(int client) {
 		float pos[3];
 		float ang[3];
 		int zColor[4];
+		float fLife;
 		getZoneTeamColor(g_CurrentZoneTeam[client], zColor);
 		if (g_Editing[client] == 1)
 		{
@@ -736,7 +743,14 @@ public void BeamBox_OnPlayerRunCmd(int client) {
 			TR_TraceRayFilter(pos, ang, MASK_PLAYERSOLID, RayType_Infinite, TraceRayDontHitSelf, client);
 			TR_GetEndPosition(g_Positions[client][1]);
 		}
-		TE_SendBeamBoxToClient(client, g_Positions[client][1], g_Positions[client][0], g_BeamSprite, g_HaloSprite, 0, 30, 0.1, 5.0, 5.0, 2, 1.0, zColor, 0);
+		if (g_Engine == Engine_Left4Dead || g_Engine == Engine_Left4Dead2)
+		{
+			fLife = 0.2;
+		}
+		else {
+			fLife = 0.1;
+		}
+		TE_SendBeamBoxToClient(client, g_Positions[client][1], g_Positions[client][0], g_BeamSprite, g_HaloSprite, 0, 30, fLife, 5.0, 5.0, 2, 1.0, zColor, 0);
 	}
 }
 
@@ -992,7 +1006,7 @@ public void EditorMenu(int client) {
 			}
 		}
 		AddMenuItem(Menu2, "", "Go to Zone");
-		AddMenuItem(Menu2, "", "Strech Zone");
+		AddMenuItem(Menu2, "", "Stretch Zone");
 		switch (g_CurrentZoneVis[client])
 		{
 			case 0:
@@ -1187,7 +1201,7 @@ int g_ClientSelectedPoint[MAXPLAYERS + 1];
 public void ScaleMenu(int client) {
 	g_Editing[client] = 3;
 	Handle Menu2 = CreateMenu(MenuHandler_Scale);
-	SetMenuTitle(Menu2, "Strech Zone");
+	SetMenuTitle(Menu2, "Stretch Zone");
 	if (g_ClientSelectedPoint[client] == 1)
 		AddMenuItem(Menu2, "", "Point B");
 	else
@@ -1351,6 +1365,8 @@ stock void GetMiddleOfABox(const float vec1[3], const float vec2[3], float buffe
 }
 
 stock void RefreshZones() {
+	if (!g_bMapStarted)
+		return;
 	RemoveZones();
 	int size = GetArraySize(g_Zones);
 	float posA[3];
