@@ -27,8 +27,9 @@ native bool Zone_IsClientInZone(int client, const char[] zone, bool equal = true
  * @bool equal     Check exact zone name or parcial name
  * @bool caseSensitive     If true, comparison is case sensitive. If false, comparison is case insensitive.
  * @return true if position is in a zone or not
+ * @note 					If you compare a player's origin inside Zone_OnClientEntry, this returns false.
  */
-native bool Zone_isPositionInZone(const char[] zone, float posx, float posy, float posz, bool equal = true, bool caseSensitive);
+native bool Zone_isPositionInZone(const char[] zone, float posx, float posy, float posz, bool equal = true, bool caseSensitive = false);
 
 /**
  * Check if zone exists
