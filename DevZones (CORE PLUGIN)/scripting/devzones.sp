@@ -620,6 +620,8 @@ public int Native_isPositionInZone(Handle plugin, int numParams) {
 	pos[2] = view_as<float>(GetNativeCell(4));
 	
 	bool same = GetNativeCell(5);
+	bool sensitive = GetNativeCell(6);
+	
 	int found = 0;
 	
 	int size = GetArraySize(g_Zones);
@@ -633,11 +635,13 @@ public int Native_isPositionInZone(Handle plugin, int numParams) {
 			GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
 			if(same)
 			{
-				if (StrEqual(name, zonename))
+				if (StrEqual(name, zonename, sensitive))
 					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
 			}else{
-				if (StrContains(name, zonename) != -1)
+				
+				if (StrContains(name, zonename, sensitive) != -1)
 					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
+
 			}
 		}
 	}
@@ -1426,7 +1430,7 @@ stock int Entity_GetGlobalName(int entity, char[] buffer, int size)
  * @param name        The global name you want to set.
  * @return          True on success, false otherwise.
  */
-stock bool Entity_SetGlobalName(int entity, const char[] name, any:...)
+stock bool Entity_SetGlobalName(int entity, const char[] name, any ...)
 {
     char format[128];
     VFormat(format, sizeof(format), name, 3);
