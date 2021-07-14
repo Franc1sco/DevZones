@@ -611,7 +611,7 @@ public int Native_ZoneExist(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_isPositionInZone(Handle plugin, int numParams) {
+public any Native_isPositionInZone(Handle plugin, int numParams) {
 	char zonename[64];
 	float pos[3];
 	GetNativeString(1, zonename, 64);
@@ -640,12 +640,15 @@ public int Native_isPositionInZone(Handle plugin, int numParams) {
 			}else{
 				
 				if (StrContains(name, zonename, sensitive) != -1)
+				{	
+					
 					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
-
+				}
 			}
 		}
 	}
-	return found;
+	
+	return view_as<bool>(found > 0);
 }
 
 public void DrawBeamBox(int client) {
