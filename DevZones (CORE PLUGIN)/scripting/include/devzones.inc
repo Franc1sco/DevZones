@@ -24,9 +24,11 @@ native bool Zone_IsClientInZone(int client, const char[] zone, bool equal = true
  * @float posx      X-Pos
  * @float posx      Y-Pos
  * @float posx      Z-Pos
+ * @bool equal     Check exact zone name or parcial name
+ * @bool caseSensitive     If true, comparison is case sensitive. If false, comparison is case insensitive.
  * @return true if position is in a zone or not
  */
-native bool Zone_isPositionInZone(const char[] zone, float posx, float posy, float posz, bool equal = true);
+native bool Zone_isPositionInZone(const char[] zone, float posx, float posy, float posz, bool equal = true, bool caseSensitive);
 
 /**
  * Check if zone exists
